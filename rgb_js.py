@@ -2,6 +2,11 @@ import numpy as np
 from PIL import Image
 
 class rgbAdjustment():
+    '''
+    Values and functions except the color Adjustment are adapted from
+    the js code https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/l1c_optimized/
+    from the Sentinel Hub Custom Script Repository transformed to Python.
+    '''
     def __init__(self):
         # Constants used for image adjustments
         self.max_reflectance = 3.0
