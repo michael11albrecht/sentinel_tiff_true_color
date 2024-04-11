@@ -12,6 +12,7 @@ class rgbAdjustment():
         self.gOff = 0.01
         self.gOffPow = self.gOff ** self.gamma
         self.gOffRange = (1 + self.gOff) ** self.gamma - self.gOffPow
+        self.curve_points_x_y = np.array([[0.41121495327102803, 0], [0.64252336448598135, 0.62890625], [1, 1]])
 
     def adjust_reflectance(self, reflectance, midR, max_reflectance):
         reflectance = np.clip(reflectance / max_reflectance, 0, 1)
@@ -35,10 +36,32 @@ class rgbAdjustment():
         return np.where(channel <= 0.0031308,
                         12.92 * channel,
                         1.055 * np.power(channel, 1 / 2.4) - 0.055)
+    
+    def get_curve(self):
+        '''
+        Get value curve for image by three points (x, y) 0 - 1
+        '''
+        # 0 = a + b * 0.41121495327102803 + c * 0.41121495327102803^2
+        # 0.62890625 = a + b * 0.64252336448598135 + c * 0.64252336448598135^2
+        # 1 = a + b + c
+
+        return np.linalg.solve(np.transpose([self.curve_points_x_y[:,0]**2, self.curve_points_x_y[:,0], [1, 1, 1]]), self.curve_points_x_y[:,1]) # c, b, a
+
+
+    def adjust_colors(self, channel, curve_values):
+        #curve values = [c, b, a] (c*x^2 + b*x + a)
+        curve = np.poly1d(curve_values)
+        return curve(channel)
 
     def evaluate_pixel(self, b04, b03, b02):
         r_lin = self.adjust_gamma(self.adjust_reflectance(b04 - self.rayleigh['r'], self.midR, self.max_reflectance))
         g_lin = self.adjust_gamma(self.adjust_reflectance(b03 - self.rayleigh['g'], self.midR, self.max_reflectance))
         b_lin = self.adjust_gamma(self.adjust_reflectance(b02 - self.rayleigh['b'], self.midR, self.max_reflectance))
         r_sat, g_sat, b_sat = self.saturation_enhancement(r_lin, g_lin, b_lin)
-        return Image.fromarray((np.dstack((self.to_sRGB(r_sat), self.to_sRGB(g_sat), self.to_sRGB(b_sat)))*255).astype(np.uint8))
+        image = []
+        curve_values = self.get_curve()
+        for i, channel in enumerate([r_sat, g_sat, b_sat]):
+            s_rgb = self.to_sRGB(channel)
+            image.append(self.adjust_colors(s_rgb, curve_values))
+        rgb = np.dstack(image)
+        return Image.fromarray((rgb*255).astype(np.uint8))
