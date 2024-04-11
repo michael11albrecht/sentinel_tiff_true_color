@@ -65,7 +65,7 @@ class rgbAdjustment():
         r_sat, g_sat, b_sat = self.saturation_enhancement(r_lin, g_lin, b_lin)
         image = []
         curve_values = self.get_curve()
-        for i, channel in enumerate([r_sat, g_sat, b_sat]):
+        for channel in [r_sat, g_sat, b_sat]:
             s_rgb = self.to_sRGB(channel)
             image.append(self.adjust_colors(s_rgb, curve_values))
         rgb = np.dstack(image)
