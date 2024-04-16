@@ -6,6 +6,8 @@ class rgbAdjustment():
     Values and functions except the color Adjustment are adapted from
     the js code https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/l1c_optimized/
     from the Sentinel Hub Custom Script Repository transformed to Python.
+    - run the function evaluate_pixel with the bands Reflectence (DN (int)/10000) B04, B03, B02 as input. (Reference https://docs.sentinel-hub.com/api/latest/data/sentinel-2-l2a/)
+    - return as PIL Image
     '''
     def __init__(self):
         # Constants used for image adjustments
