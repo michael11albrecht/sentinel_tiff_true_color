@@ -1,7 +1,7 @@
 # sentinel tiff --> true color
 Converting raw Sentinel-2 13 band images to true color rgb png files.
 
-## get wished colors (using gimp)
+## get desired colors (using gimp)
 
 - open one of your uncorrected rgb images in [Gimp](https://www.gimp.org/)
 - color correct the image with colors --> curves
